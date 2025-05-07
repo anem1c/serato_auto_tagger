@@ -1,0 +1,1 @@
+"""Serato Auto Tagger package"""
