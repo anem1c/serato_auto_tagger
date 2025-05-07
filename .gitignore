@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Serato specific
+.cache/
+History/
+Logs/
+MIDI/
+Metadata/
+Recording/
+Reports/
+Subcrates/
+Effects/
+SmartCrates/
+*.gai
+*.database
+*.pref
+database V2
+ReportsVideo/
+SeratoVideo/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+genre_organizer_logs/
+
+# Environment
+.env
+venv/
+ENV/ 
