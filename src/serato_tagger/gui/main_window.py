@@ -1,6 +1,8 @@
-from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QPushButton, QFileDialog, QProgressBar, QTextEdit, QCheckBox, QLabel
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QTextCursor, QColor, QTextCharFormat
+from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QPushButton, 
+                            QFileDialog, QProgressBar, QTextEdit, QCheckBox, 
+                            QLabel, QHBoxLayout, QFrame, QSizePolicy)
+from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtGui import QTextCursor, QColor, QTextCharFormat, QFont, QIcon
 from serato_tagger.core.genre_organizer import GenreOrganizerThread
 
 class LogTextEdit(QTextEdit):
@@ -47,48 +49,129 @@ class LogTextEdit(QTextEdit):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Serato Genre Organizer")
-        self.setGeometry(100, 100, 1000, 800)
+        self.setWindowTitle("Serato 자동 태그 관리자")
+        self.setGeometry(100, 100, 1200, 800)
+        self.setMinimumSize(1000, 700)
         
-        # Create central widget and layout
+        # 메인 위젯 설정
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
-        layout = QVBoxLayout(central_widget)
+        main_layout = QVBoxLayout(central_widget)
+        main_layout.setSpacing(20)
+        main_layout.setContentsMargins(30, 30, 30, 30)
         
-        # Create title label
+        # 상단 섹션
+        top_section = QFrame()
+        top_section.setStyleSheet("""
+            QFrame {
+                background-color: #2d2d2d;
+                border-radius: 10px;
+                padding: 20px;
+            }
+        """)
+        top_layout = QVBoxLayout(top_section)
+        
+        # 타이틀
         title_label = QLabel("Serato 자동 태그 관리자")
         title_label.setStyleSheet("""
             QLabel {
-                font-size: 24px;
+                font-size: 28px;
                 font-weight: bold;
                 color: #ffffff;
                 padding: 10px;
-                background-color: #2d2d2d;
-                border-radius: 5px;
             }
         """)
         title_label.setAlignment(Qt.AlignCenter)
         
-        # Create UI elements
-        self.folder_button = QPushButton("📁 폴더 선택")
+        # 설명
+        description = QLabel("음악 파일의 장르와 연도 정보를 자동으로 업데이트합니다.")
+        description.setStyleSheet("""
+            QLabel {
+                color: #b0b0b0;
+                font-size: 14px;
+                padding: 5px;
+            }
+        """)
+        description.setAlignment(Qt.AlignCenter)
+        
+        top_layout.addWidget(title_label)
+        top_layout.addWidget(description)
+        
+        # 중앙 섹션
+        center_section = QFrame()
+        center_section.setStyleSheet("""
+            QFrame {
+                background-color: #2d2d2d;
+                border-radius: 10px;
+                padding: 20px;
+            }
+        """)
+        center_layout = QVBoxLayout(center_section)
+        
+        # 폴더 선택 버튼
+        folder_layout = QHBoxLayout()
+        self.folder_button = QPushButton("📁 음악 폴더 선택")
+        self.folder_button.setIconSize(QSize(24, 24))
+        self.folder_button.setMinimumHeight(50)
+        folder_layout.addWidget(self.folder_button)
+        
+        # 옵션 체크박스들
+        options_layout = QHBoxLayout()
         self.process_without_genre = QCheckBox("장르가 없는 곡만 처리")
         self.update_year = QCheckBox("연도 정보 업데이트")
+        self.update_year.setChecked(True)
+        options_layout.addWidget(self.process_without_genre)
+        options_layout.addWidget(self.update_year)
+        
+        # 시작 버튼
         self.start_button = QPushButton("▶️ 장르 정리 시작")
+        self.start_button.setMinimumHeight(50)
+        
+        # 진행 상태 표시
         self.progress_bar = QProgressBar()
+        self.progress_bar.setMinimumHeight(30)
+        
+        center_layout.addLayout(folder_layout)
+        center_layout.addLayout(options_layout)
+        center_layout.addWidget(self.start_button)
+        center_layout.addWidget(self.progress_bar)
+        
+        # 로그 섹션
+        log_section = QFrame()
+        log_section.setStyleSheet("""
+            QFrame {
+                background-color: #2d2d2d;
+                border-radius: 10px;
+                padding: 20px;
+            }
+        """)
+        log_layout = QVBoxLayout(log_section)
+        
+        log_title = QLabel("처리 로그")
+        log_title.setStyleSheet("""
+            QLabel {
+                color: #ffffff;
+                font-size: 16px;
+                font-weight: bold;
+                padding: 5px;
+            }
+        """)
+        
         self.log_output = LogTextEdit()
+        self.log_output.setMinimumHeight(300)
         
-        # Set default values
-        self.update_year.setChecked(True)  # 연도 업데이트 기본 체크
+        log_layout.addWidget(log_title)
+        log_layout.addWidget(self.log_output)
         
-        # Style buttons
+        # 스타일 설정
         button_style = """
             QPushButton {
                 background-color: #4a4a4a;
                 color: white;
                 border: none;
-                padding: 10px;
                 border-radius: 5px;
                 font-size: 14px;
+                font-weight: bold;
             }
             QPushButton:hover {
                 background-color: #5a5a5a;
@@ -96,35 +179,22 @@ class MainWindow(QMainWindow):
             QPushButton:pressed {
                 background-color: #3a3a3a;
             }
+            QPushButton:disabled {
+                background-color: #2a2a2a;
+                color: #666666;
+            }
         """
-        self.folder_button.setStyleSheet(button_style)
-        self.start_button.setStyleSheet(button_style)
         
-        # Style progress bar
-        self.progress_bar.setStyleSheet("""
-            QProgressBar {
-                border: 2px solid #3c3c3c;
-                border-radius: 5px;
-                text-align: center;
-                background-color: #2d2d2d;
-                color: white;
-            }
-            QProgressBar::chunk {
-                background-color: #4CAF50;
-                border-radius: 3px;
-            }
-        """)
-        
-        # Style checkboxes
         checkbox_style = """
             QCheckBox {
                 color: white;
                 font-size: 14px;
-                padding: 5px;
+                padding: 10px;
             }
             QCheckBox::indicator {
                 width: 20px;
                 height: 20px;
+                border-radius: 3px;
             }
             QCheckBox::indicator:checked {
                 background-color: #4CAF50;
@@ -132,28 +202,46 @@ class MainWindow(QMainWindow):
             QCheckBox::indicator:unchecked {
                 background-color: #4a4a4a;
             }
+            QCheckBox::indicator:hover {
+                background-color: #5a5a5a;
+            }
         """
+        
+        progress_style = """
+            QProgressBar {
+                border: 2px solid #3c3c3c;
+                border-radius: 5px;
+                text-align: center;
+                background-color: #2d2d2d;
+                color: white;
+                font-size: 12px;
+            }
+            QProgressBar::chunk {
+                background-color: #4CAF50;
+                border-radius: 3px;
+            }
+        """
+        
+        self.folder_button.setStyleSheet(button_style)
+        self.start_button.setStyleSheet(button_style)
         self.process_without_genre.setStyleSheet(checkbox_style)
         self.update_year.setStyleSheet(checkbox_style)
+        self.progress_bar.setStyleSheet(progress_style)
         
-        # Add widgets to layout
-        layout.addWidget(title_label)
-        layout.addWidget(self.folder_button)
-        layout.addWidget(self.process_without_genre)
-        layout.addWidget(self.update_year)
-        layout.addWidget(self.start_button)
-        layout.addWidget(self.progress_bar)
-        layout.addWidget(self.log_output)
+        # 레이아웃에 섹션 추가
+        main_layout.addWidget(top_section)
+        main_layout.addWidget(center_section)
+        main_layout.addWidget(log_section)
         
-        # Connect signals
+        # 시그널 연결
         self.folder_button.clicked.connect(self.select_folder)
         self.start_button.clicked.connect(self.start_processing)
         
-        # Initialize variables
+        # 변수 초기화
         self.selected_folder = None
         self.organizer_thread = None
         
-        # Set window style
+        # 윈도우 스타일
         self.setStyleSheet("""
             QMainWindow {
                 background-color: #1e1e1e;
@@ -168,6 +256,7 @@ class MainWindow(QMainWindow):
         if folder:
             self.selected_folder = folder
             self.log_output.append_log(f"📁 선택된 폴더: {folder}")
+            self.start_button.setEnabled(True)
 
     def start_processing(self):
         if not self.selected_folder:
@@ -188,6 +277,7 @@ class MainWindow(QMainWindow):
         self.organizer_thread.finished.connect(self.processing_finished)
         
         self.start_button.setEnabled(False)
+        self.folder_button.setEnabled(False)
         self.organizer_thread.start()
 
     def update_progress(self, value):
@@ -195,4 +285,5 @@ class MainWindow(QMainWindow):
 
     def processing_finished(self):
         self.start_button.setEnabled(True)
+        self.folder_button.setEnabled(True)
         self.log_output.append_log("✨ 처리가 완료되었습니다.")
