@@ -4,6 +4,7 @@ from PyQt5.QtCore import QThread, pyqtSignal
 import json
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
+import re
 
 class GenreOrganizerThread(QThread):
     progress_updated = pyqtSignal(int)
@@ -24,6 +25,16 @@ class GenreOrganizerThread(QThread):
             client_secret=os.getenv("SPOTIFY_CLIENT_SECRET")
         )
         self.spotify = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+
+    def validate_year(self, year_str):
+        """연도 문자열이 유효한 4자리 연도인지 검증"""
+        if not year_str:
+            return None
+        
+        # 4자리 숫자만 허용 (1900-2099)
+        if re.match(r'^(19|20)\d{2}$', year_str):
+            return year_str
+        return None
 
     def get_track_info(self, track_name, artist_name):
         try:
@@ -46,7 +57,12 @@ class GenreOrganizerThread(QThread):
                 
                 # Get release year
                 release_date = track["album"]["release_date"]
-                year = release_date.split("-")[0] if release_date else None
+                year = self.validate_year(release_date.split("-")[0]) if release_date else None
+                
+                if year:
+                    self.log_message.emit(f"Found year for {track_name}: {year}")
+                else:
+                    self.log_message.emit(f"No valid year found for {track_name}")
                 
                 return genres, year
             return [], None
@@ -90,6 +106,7 @@ class GenreOrganizerThread(QThread):
                     # Update year if available
                     if year:
                         audiofile.tag.recording_date = year
+                        self.log_message.emit(f"Updated year for {title}: {year}")
                     
                     audiofile.tag.save()
                     return True
