@@ -77,6 +77,9 @@ class MainWindow(QMainWindow):
         self.progress_bar = QProgressBar()
         self.log_output = LogTextEdit()
         
+        # Set default values
+        self.update_year.setChecked(True)  # 연도 업데이트 기본 체크
+        
         # Style buttons
         button_style = """
             QPushButton {
@@ -122,6 +125,12 @@ class MainWindow(QMainWindow):
             QCheckBox::indicator {
                 width: 20px;
                 height: 20px;
+            }
+            QCheckBox::indicator:checked {
+                background-color: #4CAF50;
+            }
+            QCheckBox::indicator:unchecked {
+                background-color: #4a4a4a;
             }
         """
         self.process_without_genre.setStyleSheet(checkbox_style)
