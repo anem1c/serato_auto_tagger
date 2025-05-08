@@ -7,7 +7,7 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[],
-    hiddenimports=[],
+    hiddenimports=['PyQt5.sip'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -25,7 +25,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='Serato 자동 태그 관리자',
+    name='SeratoTagManager',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -37,6 +37,26 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     icon='src/serato_tagger/gui/icon.icns'
+)
+
+app = BUNDLE(
+    exe,
+    name='Serato 자동 태그 관리자.app',
+    icon='src/serato_tagger/gui/icon.icns',
+    bundle_identifier='com.serato.tagmanager',
+    info_plist={
+        'CFBundleShortVersionString': '1.0.0',
+        'CFBundleVersion': '1.0.0',
+        'NSHighResolutionCapable': 'True',
+        'LSBackgroundOnly': 'False',
+        'CFBundleName': 'Serato 자동 태그 관리자',
+        'CFBundleDisplayName': 'Serato 자동 태그 관리자',
+        'CFBundleGetInfoString': 'Serato 자동 태그 관리자',
+        'CFBundleIdentifier': 'com.serato.tagmanager',
+        'CFBundlePackageType': 'APPL',
+        'CFBundleSignature': '????',
+        'LSMinimumSystemVersion': '10.13.0',
+    },
 )
 
 coll = COLLECT(
